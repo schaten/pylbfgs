@@ -53,7 +53,7 @@ install:
 - cython lbfgs/_lowlevel.pyx
 - pip install -e .
 script:
-- pytest tests --cov pylbfgs
+- pytest tests --cov lbfgs
 after_success:
 - pip install coveralls
 - coveralls

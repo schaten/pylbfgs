@@ -65,7 +65,7 @@ deploy:
     tags: true
     condition: "$TRAVIS_OS_NAME = osx"
   distributions: bdist_wheel
-  password: $PYPIPASSWORD
+  password: "$PYPIPASSWORD"
 - provider: pypi
   skip_cleanup: true
   user: datamade.wheelbuilder
@@ -73,8 +73,7 @@ deploy:
     tags: true
     condition: "$TRAVIS_OS_NAME = linux"
   distributions: sdist
-  password: $PYPIPASSWORD
+  password: "$PYPIPASSWORD"
 env:
   global:
-  - secure: ODOm9ZtMYY2+SmTY/cognMTC06hixMzRR7CWwHcCZnNJcmfC2+fEKhBLf/vigHGvnrd1fNsDN/QNX43yfdqkD6q7KAYMxn2BsUdbNvwcfwS2gk6J4nO8yzeas0aisar8WqU6sg3EZUw6WlrXIYsnnXVfTpAksGZ4kPeZNIM1Fq0=
-
+  - secure: h2cFDu/I4tXx5ObUypZ7CDA+q9tRlklqIeZh+ysfg2FT7aat9mH3MPOACnBF/KNHMI+pBztGdUSjLkwFESjr7OqyXA6Y/tQiPy77O4h38c0px6kaZcvCOZy6c0qhYZQuTNggMhj1+WfaSucqntlhcqGGOhrIkJcBSgUsl7zC/FE=

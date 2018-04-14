@@ -13,14 +13,6 @@ except ImportError:
     use_cython = False
 
 
-try:
-    from Cython.Build import cythonize
-
-    use_cython = True
-except ImportError:
-    use_cython = False
-
-
 class custom_build_ext(build_ext):
     def finalize_options(self):
         build_ext.finalize_options(self)
@@ -36,13 +28,13 @@ include_dirs = ['liblbfgs', numpy.get_include()]
 
 if use_cython:
     ext_modules = cythonize(
-        [NumpyExtension('lbfgs._lowlevel',
-                        ['lbfgs/_lowlevel.pyx', 'liblbfgs/lbfgs.c'],
-                        include_dirs=include_dirs)])
+        [Extension('lbfgs._lowlevel',
+                    ['lbfgs/_lowlevel.pyx', 'liblbfgs/lbfgs.c'],
+                    include_dirs=include_dirs)])
 else:
-    ext_modules = [NumpyExtension('lbfgs._lowlevel',
-                                  ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
-                                  include_dirs=include_dirs)]
+    ext_modules = [Extension('lbfgs._lowlevel',
+                              ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
+                              include_dirs=include_dirs)]
 
 setup(
     name="PyLBFGS",

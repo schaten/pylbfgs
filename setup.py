@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from distutils.ccompiler import get_default_compiler
@@ -7,11 +6,9 @@ import numpy
 
 try:
     from Cython.Build import cythonize
-
     use_cython = True
 except ImportError:
     use_cython = False
-
 
 class custom_build_ext(build_ext):
     def finalize_options(self):
@@ -29,12 +26,12 @@ include_dirs = ['liblbfgs', numpy.get_include()]
 if use_cython:
     ext_modules = cythonize(
         [Extension('lbfgs._lowlevel',
-                    ['lbfgs/_lowlevel.pyx', 'liblbfgs/lbfgs.c'],
-                    include_dirs=include_dirs)])
+                   ['lbfgs/_lowlevel.pyx', 'liblbfgs/lbfgs.c'],
+                   include_dirs=include_dirs)])
 else:
     ext_modules = [Extension('lbfgs._lowlevel',
-                              ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
-                              include_dirs=include_dirs)]
+                             ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
+                             include_dirs=include_dirs)]
 
 setup(
     name="PyLBFGS",
@@ -43,7 +40,7 @@ setup(
     author="Lars Buitinck, Forest Gregg",
     author_email="fgregg@gmail.com",
     packages=['lbfgs'],
-    install_requires=['numpy>=1.12.1'],
+    install_requires=['numpy>=1.13.1'],
     ext_modules=ext_modules,
     classifiers=[
         "Intended Audience :: Developers",

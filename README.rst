@@ -24,13 +24,11 @@ Hacking
 =======
 Type::
 
+    pip install "pip>=10"
     pip install -r requirements.txt
-    cython lbfgs/_lowlevel.pyx
-    python setup.py build_ext -i
+    pip install -e .
 
-to build PyLBFGS in-place, i.e. without installing it.
-
-To run the test suite, make sure you have pytest_ installed, and type::
+To run the test suite::
 
     pytest tests
 

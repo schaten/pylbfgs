@@ -54,7 +54,6 @@ matrix:
 install:
 - pip install --upgrade pip
 - pip install -r requirements.txt
-- cython lbfgs/_lowlevel.pyx
 - pip install -e .
 script:
 - pytest tests --cov lbfgs

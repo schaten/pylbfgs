@@ -33,10 +33,15 @@ else:
                              ['lbfgs/_lowlevel.c', 'liblbfgs/lbfgs.c'],
                              include_dirs=include_dirs)]
 
+
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+    
 setup(
     name="PyLBFGS",
     url='https://github.com/dedupeio/pylbfgs',
-    version="0.2.0.7",
+    version="0.2.0.8",
     description="LBFGS and OWL-QN optimization algorithms",
     author="Lars Buitinck, Forest Gregg",
     author_email="fgregg@gmail.com",
@@ -54,4 +59,5 @@ setup(
         "Topic :: Software Development",
     ],
     cmdclass={'build_ext': custom_build_ext},
+    long_description=readme(),
 )

@@ -35,7 +35,8 @@ else:
 
 setup(
     name="PyLBFGS",
-    version="0.2.0.6",
+    url='https://github.com/dedupeio/pylbfgs',
+    version="0.2.0.7",
     description="LBFGS and OWL-QN optimization algorithms",
     author="Lars Buitinck, Forest Gregg",
     author_email="fgregg@gmail.com",

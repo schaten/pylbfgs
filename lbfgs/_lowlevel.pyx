@@ -343,12 +343,12 @@ cdef class LBFGS(object):
         def __set__(self, int val):
             self.params.orthantwise_end = val
 
-    def minimize(self, f, x0, progress=None, args=()):
+    def minimize(self, f1, jac, x0, progress=None, args=()):
         """Minimize a function using LBFGS or OWL-QN
 
         Parameters
         ----------
-        f : callable(x, g, *args)
+        f : callable(x, *args)
             Computes function to minimize and its gradient.
             Called with the current position x (a numpy.ndarray), a gradient
             vector g (a numpy.ndarray) to be filled in and *args.
@@ -373,10 +373,18 @@ cdef class LBFGS(object):
         cdef lbfgsfloatval_t *x_a
         cdef lbfgsfloatval_t* fx_final = NULL
 
-        if not callable(f):
-            raise TypeError("f must be callable, got %s" % type(f))
+        if not callable(f1):
+            raise TypeError("f1 must be callable, got %s" % type(f1))
+        if not callable(jac):
+            raise TypeError("jac must be callable, got %s" % type(jac))
         if progress is not None and not callable(progress):
-            raise TypeError("progress must be callable, got %s" % type(f))
+            raise TypeError("progress must be callable, got %s" % type(progress))
+
+        def f(x, g, args=()):
+            res = jac(x)
+            for (i, e) in enumerate(res):
+                g[i] = e;
+            return f1(x, *args)
 
         x0 = np.atleast_1d(x0)
         n = np.product(x0.shape)

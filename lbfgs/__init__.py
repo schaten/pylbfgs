@@ -7,16 +7,29 @@ Python wrapper around liblbfgs.
 from ._lowlevel import LBFGS, LBFGSError
 
 
-def fmin_lbfgs(f, x0, progress=None, args=(), orthantwise_c=0,
-               orthantwise_start=0, orthantwise_end=-1, m=6,
-               epsilon=1e-5, past=0, delta=0., max_iterations=0,
-               line_search="default", max_linesearch=20, min_step=1e-20,
-               max_step=1e+20, ftol=1e-4, wolfe=0.9, gtol=0.9, xtol=1e-30):
+def minimize(f, x0, jac=None, callback=None, args=(), options = {
+                'orthantwise_c': 0,
+                'orthantwise_start': 0,
+                'orthantwise_end': -1,
+                'm': 6,
+                'epsilon': 1e-5,
+                'past': 0,
+                'delta': 0.,
+                'max_iterations': 0,
+                'line_search': "default",
+                'max_linesearch': 20,
+                'min_step': 1e-20,
+                'max_step': 1e+20,
+                'ftol': 1e-4,
+                'wolfe': 0.9,
+                'gtol': 0.9,
+                'xtol': 1e-30}
+            ):
     """Minimize a function using LBFGS or OWL-QN
 
      Parameters
     ----------
-    f : callable(x, g, *args)
+    f : callable(x, *args)
         Computes function to minimize and its gradient.
         Called with the current position x (a numpy.ndarray), a gradient
         vector g (a numpy.ndarray) to be filled in and *args.
@@ -24,7 +37,7 @@ def fmin_lbfgs(f, x0, progress=None, args=(), orthantwise_c=0,
     x0 : array-like
         Initial values. A copy of this array is made prior to optimization.
 
-    progress : callable(x, g, fx, xnorm, gnorm, step, k, num_eval, *args),
+    callback : callable(x, g, fx, xnorm, gnorm, step, k, num_eval, *args),
                optional
         If not None, called at each iteration after the call to f with the
         current values of x, g and f(x), the L2 norms of x and g, the line
@@ -35,7 +48,7 @@ def fmin_lbfgs(f, x0, progress=None, args=(), orthantwise_c=0,
 
     args : sequence
         Arbitrary list of arguments, passed on to f and progress as *args.
-
+options:
     orthantwise_c: float, optional (default=0)
         Coefficient for the L1 norm of variables.
         This parameter should be set to zero for standard minimization
@@ -169,21 +182,24 @@ def fmin_lbfgs(f, x0, progress=None, args=(), orthantwise_c=0,
 
     """
     opt = LBFGS()
-    opt.orthantwise_c = orthantwise_c
-    opt.orthantwise_start = orthantwise_start
-    opt.orthantwise_end = orthantwise_end
-    opt.m = m
-    opt.epsilon = epsilon
-    opt.past = past
-    opt.delta = delta
-    opt.max_iterations = max_iterations
-    opt.linesearch = line_search
-    opt.max_linesearch = max_linesearch
-    opt.min_step = min_step
-    opt.max_step = max_step
-    opt.ftol = ftol
-    opt.wolfe = wolfe
-    opt.gtol = gtol
-    opt.xtol = xtol
-
-    return opt.minimize(f, x0, progress=progress, args=args)
+    opt.orthantwise_c = options["orthantwise_c"]
+    opt.orthantwise_start = options["orthantwise_start"]
+    opt.orthantwise_end = options["orthantwise_end"]
+    opt.m = options["m"]
+    opt.epsilon = options["epsilon"]
+    opt.past = options["past"]
+    opt.delta = options["delta"]
+    opt.max_iterations = options["max_iterations"]
+    opt.linesearch = options["line_search"]
+    opt.max_linesearch = options["max_linesearch"]
+    opt.min_step = options["min_step"]
+    opt.max_step = options["max_step"]
+    opt.ftol = options["ftol"]
+    opt.wolfe = options["wolfe"]
+    opt.gtol = options["gtol"]
+    opt.xtol = options["xtol"]
+    return opt.minimize(f, jac, x0, progress=callback, args=args)
+"""    def ff(x, g, args=()):
+        g[0] = jac(x)
+        return f(x, *args)
+"""

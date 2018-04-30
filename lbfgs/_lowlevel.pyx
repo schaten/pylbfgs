@@ -220,6 +220,9 @@ _ERROR_MESSAGES = {
 class LBFGSError(Exception):
     pass
 
+class OptimizeResult:
+    def __init__(self, **data):
+        self.__dict__.update(data)
 
 cdef class LBFGS(object):
     """LBFGS algorithm, wrapped in a class to permit setting parameters"""
@@ -408,13 +411,21 @@ cdef class LBFGS(object):
                 x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
                                                        <void *>x_a).copy()
 
-                return x_array.reshape(x0.shape)
+                ret = {}
+                ret['x'] = x_array.reshape(x0.shape)
+                ret['success'] = True
+                return OptimizeResult(**ret)
+
             elif r in (LBFGSERR_ROUNDING_ERROR, LBFGSERR_MAXIMUMLINESEARCH) :
                 warnings.warn(_ERROR_MESSAGES[r])
                 x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
                                                        <void *>x_a).copy()
 
-                return x_array.reshape(x0.shape)
+                ret = {}
+                ret['x'] = x_array.reshape(x0.shape)
+                ret['success'] = False
+                return OptimizeResult(**ret)
+
             elif r == LBFGSERR_OUTOFMEMORY:
                 raise MemoryError
             else:

@@ -7,7 +7,8 @@ Python wrapper around liblbfgs.
 from ._lowlevel import LBFGS, LBFGSError
 
 
-def minimize(f, x0, jac=None, callback=None, args=(), options = {
+def minimize(f, x0, jac=None, callback=None, args=(), options = {}):
+    default_options = {
                 'orthantwise_c': 0,
                 'orthantwise_start': 0,
                 'orthantwise_end': -1,
@@ -23,8 +24,8 @@ def minimize(f, x0, jac=None, callback=None, args=(), options = {
                 'ftol': 1e-4,
                 'wolfe': 0.9,
                 'gtol': 0.9,
-                'xtol': 1e-30}
-            ):
+                'xtol': 1e-30 }
+
     """Minimize a function using LBFGS or OWL-QN
 
      Parameters
@@ -181,6 +182,10 @@ options:
 
 
     """
+    for o in default_options:
+        if o not in options:
+            options[o] = default_options[o]
+
     opt = LBFGS()
     opt.orthantwise_c = options["orthantwise_c"]
     opt.orthantwise_start = options["orthantwise_start"]

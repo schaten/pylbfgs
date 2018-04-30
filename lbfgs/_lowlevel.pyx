@@ -424,12 +424,18 @@ cdef class LBFGS(object):
                 ret = {}
                 ret['x'] = x_array.reshape(x0.shape)
                 ret['success'] = False
+                ret['message'] = _ERROR_MESSAGES[r]
                 return OptimizeResult(**ret)
 
             elif r == LBFGSERR_OUTOFMEMORY:
                 raise MemoryError
             else:
                 raise LBFGSError(_ERROR_MESSAGES[r])
+                ret = {}
+                ret['x'] = x_array.reshape(x0.shape)
+                ret['success'] = False
+                ret['message'] = _ERROR_MESSAGES[r]
+                return OptimizeResult(**ret)
 
         finally:
             lbfgs_free(x_a)

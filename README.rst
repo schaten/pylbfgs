@@ -1,9 +1,7 @@
 PyLBFGS
 =======
 
-.. image:: https://travis-ci.org/dedupeio/pylbfgs.svg?branch=master
-    :target: https://travis-ci.org/dedupeio/pylbfgs
-
+This fork: API similar to scipy.optimize
 
 This is a Python wrapper around Naoaki Okazaki (chokkan)'s liblbfgs_ library
 of quasi-Newton optimization routines (limited memory BFGS and OWL-QN).
@@ -12,6 +10,12 @@ This package aims to provide a cleaner interface to the LBFGS
 algorithm than is currently available in SciPy_, and to provide the
 OWL-QN algorithm to Python users.
 
+Usage
+=====
+example.py currently only Python2..
+Type::
+    python2 setup.py build_ext --inplace
+    python2 example.py
 
 Installing
 ==========

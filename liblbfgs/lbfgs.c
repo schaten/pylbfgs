@@ -477,6 +477,15 @@ int lbfgs(
             veccpy(x, xp, n);
             veccpy(g, gp, n);
             ret = ls;
+            if(ls == LBFGSERR_ROUNDING_ERROR) {
+                int myi;
+                for(myi=0; myi<n; myi++) {
+                    printf("%e", d[myi]);
+                    if(!(myi % 3))
+                        printf("\n");
+                }
+                printf("\n");
+            }
             goto lbfgs_exit;
         }
 

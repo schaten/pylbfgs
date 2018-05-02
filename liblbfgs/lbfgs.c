@@ -52,7 +52,7 @@ The line search algorithms used in this implementation are described in:
 This library also implements Orthant-Wise Limited-memory Quasi-Newton (OWL-QN)
 method presented in:
     - Galen Andrew and Jianfeng Gao.
-      Scalable training of L1-regularized log-linear models.
+    Scalable training of L1-regularized log-linear models.
       In <i>Proceedings of the 24th International Conference on Machine
       Learning (ICML 2007)</i>, pp. 33-40, 2007.
 
@@ -248,6 +248,8 @@ int lbfgs(
     lbfgsfloatval_t *ptr_fx,
     lbfgs_evaluate_t proc_evaluate,
     lbfgs_progress_t proc_progress,
+    int (*call_debug)(void *, lbfgsfloatval_t),
+    double np_vec[],
     void *instance,
     lbfgs_parameter_t *_param
     )
@@ -477,14 +479,13 @@ int lbfgs(
             veccpy(x, xp, n);
             veccpy(g, gp, n);
             ret = ls;
-            if(ls == LBFGSERR_ROUNDING_ERROR) {
+            /* Print failed search direction */
+            if(ls == LBFGSERR_ROUNDING_ERROR && param.disp) {
                 int myi;
                 for(myi=0; myi<n; myi++) {
-                    printf("%e", d[myi]);
-                    if(!(myi % 3))
-                        printf("\n");
+                    np_vec[myi] = d[myi]; 
                 }
-                printf("\n");
+                call_debug(instance, step); 
             }
             goto lbfgs_exit;
         }

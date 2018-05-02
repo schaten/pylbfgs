@@ -355,6 +355,11 @@ typedef struct {
      *  L1 norm of the variables x,
      */
     int             orthantwise_end;
+
+    /**
+     * Display additional error messages
+     */
+    int             disp;
 } lbfgs_parameter_t;
 
 
@@ -480,6 +485,8 @@ int lbfgs(
     lbfgsfloatval_t *ptr_fx,
     lbfgs_evaluate_t proc_evaluate,
     lbfgs_progress_t proc_progress,
+    int (*proc_debug)(void *, lbfgsfloatval_t),
+    double *,
     void *instance,
     lbfgs_parameter_t *param
     );

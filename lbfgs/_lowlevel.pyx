@@ -7,8 +7,13 @@ Python wrapper around liblbfgs.
 cimport numpy as np
 import numpy as np
 import warnings
+import signal, os, sys
 
 np.import_array()   # initialize Numpy
+
+def handler(signum, frame):
+    print 'Signal handler called with signal', signum
+    os._exit(1)
 
 ctypedef enum LineSearchAlgo :
     LBFGS_LINESEARCH_DEFAULT = 0,
@@ -58,6 +63,7 @@ ctypedef enum ReturnCode:
 
 cdef extern from "lbfgs.h":
     ctypedef double lbfgsfloatval_t
+    ctypedef int (*call_debug_t)(void *pyfun, lbfgsfloatval_t step)
     ctypedef lbfgsfloatval_t* lbfgsconst_p "const lbfgsfloatval_t *"
 
     ctypedef lbfgsfloatval_t (*lbfgs_evaluate_t)(void *, lbfgsconst_p,
@@ -84,9 +90,10 @@ cdef extern from "lbfgs.h":
         lbfgsfloatval_t orthantwise_c
         int orthantwise_start
         int orthantwise_end
+        int disp
 
     ReturnCode lbfgs(int, lbfgsfloatval_t *, lbfgsfloatval_t *, lbfgs_evaluate_t,
-                     lbfgs_progress_t, void *, lbfgs_parameter_t *)
+                     lbfgs_progress_t, call_debug_t, double *, void *, lbfgs_parameter_t *)
 
     void lbfgs_parameter_init(lbfgs_parameter_t *)
     lbfgsfloatval_t *lbfgs_malloc(int)
@@ -112,7 +119,7 @@ cdef lbfgsfloatval_t call_eval(void *cb_data_v,
     cdef np.npy_intp tshape[1]
 
     callback_data = <object>cb_data_v
-    (f, progress_fn, shape, args) = callback_data
+    (f, progress_fn, debug, shape, args) = callback_data
     tshape[0] = <np.npy_intp>n
     x_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE, <void *>x)
     g_array = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE, <void *>g)
@@ -130,7 +137,7 @@ cdef int call_progress(void *cb_data_v,
     cdef np.npy_intp tshape[1]
 
     callback_data = <object>cb_data_v
-    (f, progress_fn, shape, args) = callback_data
+    (f, progress_fn, debug, shape, args) = callback_data
 
     if progress_fn:
         tshape[0] = <np.npy_intp>n
@@ -158,6 +165,13 @@ cdef lbfgsfloatval_t *aligned_copy(x) except NULL:
         x_copy[i] = x[i]
     return x_copy
 
+# Debug-Callback
+cdef int call_debug(void *cb_data_v, lbfgsfloatval_t step): #Vom Typ call_debug_t
+    callback_data = <object>cb_data_v
+    (f, progress_fn, debug, shape, args) = callback_data
+    return (<object>debug)({
+        'step': step
+        })
 
 _LINE_SEARCH_ALGO = {
     'default' : LBFGS_LINESEARCH_DEFAULT,
@@ -233,6 +247,14 @@ cdef class LBFGS(object):
         lbfgs_parameter_init(&self.params)
 
     LINE_SEARCH_ALGORITHMS = _LINE_SEARCH_ALGO.keys()
+
+    property disp:
+        def __get__(self) :
+            return self.params.disp
+
+        def __set__(self, int val):
+            self.params.disp = val
+
 
     property m:
         def __get__(self) :
@@ -346,7 +368,7 @@ cdef class LBFGS(object):
         def __set__(self, int val):
             self.params.orthantwise_end = val
 
-    def minimize(self, f1, jac, x0, progress=None, args=()):
+    def minimize(self, f1, jac, x0, progress=None, debug_callback=None, args=()):
         """Minimize a function using LBFGS or OWL-QN
 
         Parameters
@@ -401,10 +423,26 @@ cdef class LBFGS(object):
 
         x_a = aligned_copy(x0.ravel())
 
+        # Create storage for lbfgs-debugcallback
+        np_vec_dir = np.zeros( len(x0) )
+        cdef np.ndarray[double,ndim=1,mode="c"] vec_dir
+        vec_dir = np.ascontiguousarray(np_vec_dir, dtype=np.double)
+        def debug_wrapper(step):
+            if callable(debug_callback):
+                vec_x = np.PyArray_SimpleNewFromData(1, tshape, np.NPY_DOUBLE,
+                                                       <void *>x_a).copy()
+                vec_x = vec_x.reshape(x0.shape)
+                return debug_callback(vec_x, np_vec_dir, step)
+            else:
+                return 0
+
+        # Set the signal handler
+        signal.signal(signal.SIGINT, handler)
+
         try:
-            callback_data = (f, progress, x0.shape, args)
+            callback_data = (f, progress, debug_wrapper, x0.shape, args)
             r = lbfgs(n, x_a, fx_final, call_eval,
-                      call_progress, <void *>callback_data, &self.params)
+                      call_progress, call_debug, &vec_dir[0], <void *>callback_data, &self.params)
 
             if r == LBFGS_SUCCESS or r == LBFGS_ALREADY_MINIMIZED:
 

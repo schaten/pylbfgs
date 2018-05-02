@@ -7,8 +7,10 @@ Python wrapper around liblbfgs.
 from ._lowlevel import LBFGS, LBFGSError
 
 
-def minimize(f, x0, jac=None, callback=None, args=(), options = {}):
+def minimize(f, x0, jac=None, callback=None, debug_callback=None, args=(), options = {}):
     default_options = {
+                'maxiter': 0,
+                'disp': 0,
                 'orthantwise_c': 0,
                 'orthantwise_start': 0,
                 'orthantwise_end': -1,
@@ -16,7 +18,6 @@ def minimize(f, x0, jac=None, callback=None, args=(), options = {}):
                 'epsilon': 1e-5,
                 'past': 0,
                 'delta': 0.,
-                'max_iterations': 0,
                 'line_search': "default",
                 'max_linesearch': 20,
                 'min_step': 1e-20,
@@ -50,6 +51,7 @@ def minimize(f, x0, jac=None, callback=None, args=(), options = {}):
     args : sequence
         Arbitrary list of arguments, passed on to f and progress as *args.
 options:
+    disp: 'Print verbose logs'
     orthantwise_c: float, optional (default=0)
         Coefficient for the L1 norm of variables.
         This parameter should be set to zero for standard minimization
@@ -115,7 +117,7 @@ options:
         the objective value of the current iteration.
         The default value is 0.
 
-    max_iterations: int, optional (default=0)
+    maxiter: int, optional (default=0)
         The maximum number of iterations. Setting this parameter to zero continues an
         optimization process until a convergence or error. The default value
         is 0.
@@ -187,6 +189,7 @@ options:
             options[o] = default_options[o]
 
     opt = LBFGS()
+    opt.disp = options['disp']
     opt.orthantwise_c = options["orthantwise_c"]
     opt.orthantwise_start = options["orthantwise_start"]
     opt.orthantwise_end = options["orthantwise_end"]
@@ -194,7 +197,7 @@ options:
     opt.epsilon = options["epsilon"]
     opt.past = options["past"]
     opt.delta = options["delta"]
-    opt.max_iterations = options["max_iterations"]
+    opt.max_iterations = options["maxiter"]
     opt.linesearch = options["line_search"]
     opt.max_linesearch = options["max_linesearch"]
     opt.min_step = options["min_step"]
@@ -203,7 +206,8 @@ options:
     opt.wolfe = options["wolfe"]
     opt.gtol = options["gtol"]
     opt.xtol = options["xtol"]
-    return opt.minimize(f, jac, x0, progress=callback, args=args)
+
+    return opt.minimize(f, jac, x0, progress=callback, debug_callback=debug_callback, args=args)
 """    def ff(x, g, args=()):
         g[0] = jac(x)
         return f(x, *args)
